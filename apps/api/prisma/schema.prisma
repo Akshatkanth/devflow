@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ProjectRole {
+  OWNER
+  MEMBER
+}
+
+enum DeploymentStatus {
+  QUEUED
+  CLONING
+  VALIDATING
+  BUILDING
+  HEALTH_CHECK
+  HEALTHY
+  FAILED
+  CANCELLED
+}
+
+enum LogLevel {
+  info
+  warn
+  error
+  success
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  passwordHash String
+  name         String?
+  role         UserRole        @default(USER)
+  refreshToken String?         // hashed refresh token
+  projects     ProjectMember[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@map("users")
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  repoUrl     String
+  branch      String          @default("main")
+  description String?
+  framework   String?         // detected: node, python, go, etc.
+  envVars     Json?           // encrypted key-value pairs
+  members     ProjectMember[]
+  deployments Deployment[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  userId    String
+  projectId String
+  role      ProjectRole @default(MEMBER)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@id([userId, projectId])
+  @@map("project_members")
+}
+
+model Deployment {
+  id            String           @id @default(cuid())
+  projectId     String
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status        DeploymentStatus @default(QUEUED)
+  commitSha     String?
+  commitMessage String?
+  triggeredBy   String?          // user id
+  error         String?          // error message on failure
+  startedAt     DateTime?
+  completedAt   DateTime?
+  duration      Int?             // seconds
+  logs          DeploymentLog[]
+  createdAt     DateTime         @default(now())
+
+  @@index([projectId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("deployments")
+}
+
+model DeploymentLog {
+  id           String     @id @default(cuid())
+  deploymentId String
+  deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  message      String
+  level        LogLevel   @default(info)
+  timestamp    DateTime   @default(now())
+
+  @@index([deploymentId, timestamp])
+  @@map("deployment_logs")
+}

@@ -1,0 +1,185 @@
+import { prisma } from '../../config/database';
+import { logger } from '../../config/logger';
+import { NotFoundError, ForbiddenError, AppError } from '../../middleware/errorHandler';
+import { enqueueDeployment } from '../../queue/deploymentQueue';
+import {
+  deploymentsTotal,
+  activeDeployments,
+  deploymentDuration,
+} from '../../metrics/registry';
+import type { Deployment, DeploymentLog, PaginatedResponse } from '@devflow/shared';
+import { DeploymentStatus, LogLevel, ProjectRole } from '@devflow/shared';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+async function assertDeploymentAccess(deploymentId: string, userId: string): Promise<Deployment> {
+  const deployment = await prisma.deployment.findUnique({
+    where: { id: deploymentId },
+    include: { project: { include: { members: true } } },
+  });
+
+  if (!deployment) throw new NotFoundError('Deployment');
+
+  const isMember = deployment.project.members.some((m) => m.userId === userId);
+  if (!isMember) throw new NotFoundError('Deployment');
+
+  return {
+    id: deployment.id,
+    projectId: deployment.projectId,
+    status: deployment.status as DeploymentStatus,
+    commitSha: deployment.commitSha,
+    commitMessage: deployment.commitMessage,
+    triggeredBy: deployment.triggeredBy,
+    startedAt: deployment.startedAt,
+    completedAt: deployment.completedAt,
+    duration: deployment.duration,
+    error: deployment.error,
+    createdAt: deployment.createdAt,
+  };
+}
+
+// ─── Deployments Service ──────────────────────────────────────────────────────
+
+export async function triggerDeployment(
+  projectId: string,
+  userId: string,
+  commitMessage?: string
+): Promise<Deployment> {
+  // Verify user is a member of the project
+  const membership = await prisma.projectMember.findUnique({
+    where: { userId_projectId: { userId, projectId } },
+    include: { project: true },
+  });
+
+  if (!membership) throw new NotFoundError('Project');
+
+  // Check for an already-running deployment on this project
+  const running = await prisma.deployment.findFirst({
+    where: {
+      projectId,
+      status: {
+        in: [
+          DeploymentStatus.QUEUED,
+          DeploymentStatus.CLONING,
+          DeploymentStatus.VALIDATING,
+          DeploymentStatus.BUILDING,
+          DeploymentStatus.HEALTH_CHECK,
+        ],
+      },
+    },
+  });
+
+  if (running) {
+    throw new AppError(409, 'A deployment is already in progress for this project', 'DEPLOY_IN_PROGRESS');
+  }
+
+  // Create DB record first (so we have an ID for the queue job)
+  const deployment = await prisma.deployment.create({
+    data: {
+      projectId,
+      status: DeploymentStatus.QUEUED,
+      commitMessage: commitMessage ?? 'Manual deployment',
+      triggeredBy: userId,
+    },
+  });
+
+  // Enqueue the pipeline job
+  await enqueueDeployment({
+    deploymentId: deployment.id,
+    projectId,
+    repoUrl: membership.project.repoUrl,
+    branch: membership.project.branch,
+    triggeredBy: userId,
+  });
+
+  // Track metrics
+  deploymentsTotal.inc({ status: 'queued', framework: 'unknown' });
+  activeDeployments.inc();
+
+  logger.info({ deploymentId: deployment.id, projectId, userId }, 'Deployment triggered');
+
+  return {
+    id: deployment.id,
+    projectId: deployment.projectId,
+    status: deployment.status as DeploymentStatus,
+    commitSha: deployment.commitSha,
+    commitMessage: deployment.commitMessage,
+    triggeredBy: deployment.triggeredBy,
+    startedAt: deployment.startedAt,
+    completedAt: deployment.completedAt,
+    duration: deployment.duration,
+    error: deployment.error,
+    createdAt: deployment.createdAt,
+  };
+}
+
+export async function getDeployment(deploymentId: string, userId: string): Promise<Deployment> {
+  return assertDeploymentAccess(deploymentId, userId);
+}
+
+export async function getDeploymentLogs(
+  deploymentId: string,
+  userId: string,
+  page: number,
+  limit: number
+): Promise<PaginatedResponse<DeploymentLog>> {
+  await assertDeploymentAccess(deploymentId, userId);
+
+  const [logs, total] = await Promise.all([
+    prisma.deploymentLog.findMany({
+      where: { deploymentId },
+      orderBy: { timestamp: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.deploymentLog.count({ where: { deploymentId } }),
+  ]);
+
+  return {
+    data: logs.map((l) => ({
+      id: l.id,
+      deploymentId: l.deploymentId,
+      message: l.message,
+      level: l.level as LogLevel,
+      timestamp: l.timestamp,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+export async function cancelDeployment(deploymentId: string, userId: string): Promise<Deployment> {
+  const deployment = await assertDeploymentAccess(deploymentId, userId);
+
+  const cancellableStatuses = [
+    DeploymentStatus.QUEUED,
+    DeploymentStatus.CLONING,
+    DeploymentStatus.VALIDATING,
+    DeploymentStatus.BUILDING,
+    DeploymentStatus.HEALTH_CHECK,
+  ];
+
+  if (!cancellableStatuses.includes(deployment.status)) {
+    throw new AppError(
+      409,
+      `Deployment cannot be cancelled in status: ${deployment.status}`,
+      'INVALID_STATUS_TRANSITION'
+    );
+  }
+
+  // Verify ownership or at least membership (any member can cancel)
+  const updated = await prisma.deployment.update({
+    where: { id: deploymentId },
+    data: {
+      status: DeploymentStatus.CANCELLED,
+      completedAt: new Date(),
+    },
+  });
+
+  activeDeployments.dec();
+  logger.info({ deploymentId, userId }, 'Deployment cancelled');
+
+  return { ...deployment, status: updated.status as DeploymentStatus };
+}
