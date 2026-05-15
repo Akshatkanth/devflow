@@ -30,7 +30,7 @@ export function validate<T>(schema: ZodSchema<T>, target: ValidateTarget = 'body
     }
 
     // Replace with Zod-parsed output (includes defaults & coercions)
-    (req as Record<string, unknown>)[target] = result.data;
+    (req as unknown as Record<string, unknown>)[target] = result.data;
     next();
   };
 }

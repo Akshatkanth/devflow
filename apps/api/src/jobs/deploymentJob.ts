@@ -1,7 +1,7 @@
-import { prisma } from '../../config/database';
-import { logger } from '../../config/logger';
-import { getIoServer } from '../../websocket/io';
-import type { DeploymentJobData } from '../deploymentQueue';
+import { prisma } from '../config/database';
+import { logger } from '../config/logger';
+import { getIoServer } from '../websocket/io';
+import type { DeploymentJobData } from '../queue/deploymentQueue';
 import { DeploymentStatus, LogLevel } from '@devflow/shared';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -257,7 +257,6 @@ export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
         commitSha,
         completedAt: new Date(),
         duration,
-        framework,
       },
     });
 

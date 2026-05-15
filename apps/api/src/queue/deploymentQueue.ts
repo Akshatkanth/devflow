@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
-import { redis } from '../../config/redis';
-import { logger } from '../../config/logger';
+import { redis } from '../config/redis';
+import { logger } from '../config/logger';
 
 export interface DeploymentJobData {
   deploymentId: string;

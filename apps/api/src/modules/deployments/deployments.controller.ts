@@ -10,7 +10,7 @@ export async function triggerDeployment(
   try {
     const { commitMessage } = TriggerDeploymentSchema.parse(req.body);
     const deployment = await deploymentsService.triggerDeployment(
-      req.params.projectId,
+      req.params.projectId as string,
       req.user!.sub,
       commitMessage
     );
@@ -31,7 +31,7 @@ export async function getDeployment(
 ): Promise<void> {
   try {
     const deployment = await deploymentsService.getDeployment(
-      req.params.id,
+      req.params.id as string,
       req.user!.sub
     );
     res.status(200).json({ success: true, data: { deployment } });
@@ -48,7 +48,7 @@ export async function getDeploymentLogs(
   try {
     const { page, limit } = PaginationSchema.parse(req.query);
     const result = await deploymentsService.getDeploymentLogs(
-      req.params.id,
+      req.params.id as string,
       req.user!.sub,
       page,
       limit
@@ -66,7 +66,7 @@ export async function cancelDeployment(
 ): Promise<void> {
   try {
     const deployment = await deploymentsService.cancelDeployment(
-      req.params.id,
+      req.params.id as string,
       req.user!.sub
     );
     res.status(200).json({

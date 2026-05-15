@@ -1,9 +1,9 @@
 import { Worker, Job } from 'bullmq';
-import { redis } from '../../config/redis';
-import { logger } from '../../config/logger';
-import { runDeploymentJob } from '../../jobs/deploymentJob';
-import { DEPLOYMENT_QUEUE_NAME } from '../deploymentQueue';
-import type { DeploymentJobData } from '../deploymentQueue';
+import { redis } from '../config/redis';
+import { logger } from '../config/logger';
+import { runDeploymentJob } from '../jobs/deploymentJob';
+import { DEPLOYMENT_QUEUE_NAME } from './deploymentQueue';
+import type { DeploymentJobData } from './deploymentQueue';
 
 let worker: Worker<DeploymentJobData> | null = null;
 

@@ -22,7 +22,7 @@ export async function listProjects(req: Request, res: Response, next: NextFuncti
 
 export async function getProject(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const project = await projectsService.getProject(req.params.id, req.user!.sub);
+    const project = await projectsService.getProject(req.params.id as string, req.user!.sub);
     res.status(200).json({ success: true, data: { project } });
   } catch (err) {
     next(err);
@@ -31,7 +31,7 @@ export async function getProject(req: Request, res: Response, next: NextFunction
 
 export async function updateProject(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const project = await projectsService.updateProject(req.params.id, req.body, req.user!.sub);
+    const project = await projectsService.updateProject(req.params.id as string, req.body, req.user!.sub);
     res.status(200).json({ success: true, data: { project } });
   } catch (err) {
     next(err);
@@ -40,7 +40,7 @@ export async function updateProject(req: Request, res: Response, next: NextFunct
 
 export async function deleteProject(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await projectsService.deleteProject(req.params.id, req.user!.sub);
+    await projectsService.deleteProject(req.params.id as string, req.user!.sub);
     res.status(200).json({ success: true, data: null, message: 'Project deleted' });
   } catch (err) {
     next(err);
@@ -55,7 +55,7 @@ export async function getProjectDeployments(
   try {
     const { page, limit } = PaginationSchema.parse(req.query);
     const result = await projectsService.getProjectDeployments(
-      req.params.id,
+      req.params.id as string,
       req.user!.sub,
       page,
       limit
