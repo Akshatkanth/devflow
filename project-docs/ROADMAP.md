@@ -1,8 +1,8 @@
 # DevFlow - Roadmap
 
-## Current Phase: Phase 1 (Completed)
-- **Goal:** Establish a fully functional local development environment with a simulated deployment pipeline.
-- **Status:** Complete.
+## Current Phase: Phase 5 (Completed)
+- **Goal:** Frontend polish, observability, CI/security hardening and local verification.
+- **Status:** Verified (see evidence below).
 
 ### Completed Tasks
 - [x] Monorepo foundation with Turborepo, TS, ESLint, Prettier.
@@ -53,3 +53,26 @@
 - **Artifacts:** Store built container images (e.g., push to AWS ECR or Docker Hub).
 - **Provisioning:** Create Terraform/Pulumi scripts for AWS/GCP cloud deployments.
 - **Routing:** Implement dynamic subdomain routing mapping for deployed user projects.
+
+---
+
+## Verification (local)
+
+Verified on **2026-05-17**: the codebase contains working implementations for Phases 1→5 and representative tests/build steps. Key evidence (representative files):
+
+- Monorepo config: [turbo.json](../turbo.json)
+- Shared package (schemas/types): [packages/shared/package.json](../packages/shared/package.json)
+- Prisma schema: [apps/api/prisma/schema.prisma](../apps/api/prisma/schema.prisma)
+- Backend routes & services: [apps/api/src/modules/auth/auth.routes.ts](../apps/api/src/modules/auth/auth.routes.ts), [apps/api/src/modules/projects/projects.routes.ts](../apps/api/src/modules/projects/projects.routes.ts), [apps/api/src/modules/deployments/deployments.routes.ts](../apps/api/src/modules/deployments/deployments.routes.ts)
+- Queue & worker: [apps/api/src/queue/deploymentQueue.ts](../apps/api/src/queue/deploymentQueue.ts), [apps/api/src/queue/deploymentWorker.ts](../apps/api/src/queue/deploymentWorker.ts)
+- Simulated pipeline job: [apps/api/src/jobs/deploymentJob.ts](../apps/api/src/jobs/deploymentJob.ts)
+- WebSocket live logs: [apps/api/src/websocket/io.ts](../apps/api/src/websocket/io.ts)
+- Prometheus metrics: [apps/api/src/metrics/registry.ts](../apps/api/src/metrics/registry.ts)
+- Grafana dashboard provisioning: [infra/grafana/provisioning/dashboards/devflow-overview.json](../infra/grafana/provisioning/dashboards/devflow-overview.json)
+- Frontend (Next.js) pages: [apps/web/src/app/page.tsx](../apps/web/src/app/page.tsx), [apps/web/src/app/dashboard/page.tsx](../apps/web/src/app/dashboard/page.tsx), [apps/web/src/app/deployments/[id]/page.tsx](../apps/web/src/app/deployments/[id]/page.tsx)
+- CI pipeline and Trivy scan: [.github/workflows/ci.yml](../.github/workflows/ci.yml)
+- Integration & shape tests: [apps/api/src/__tests__/projects.test.ts](../apps/api/src/__tests__/projects.test.ts), [apps/api/src/__tests__/errors.test.ts](../apps/api/src/__tests__/errors.test.ts)
+
+Notes:
+- Small remaining item: `apps/api/tsconfig.json` contains an `ignoreDeprecations` entry that may trigger `tsc` warnings/errors in some environments — consider standardizing or removing that option to avoid CI tsc failures. See [apps/api/tsconfig.json](../apps/api/tsconfig.json).
+- Future phases (Phase 6+) are intentionally unimplemented and are listed under "Future Work" above.

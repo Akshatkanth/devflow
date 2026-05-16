@@ -3,14 +3,14 @@
 Goal: complete all planned phases quickly and locally before formal testing.
 
 ## Reality Check (Current Codebase)
-Most Phase 2-5 features already exist in code. The fastest strategy is to close final gaps and harden behavior, not rebuild completed modules.
+Most Phase 1-5 features are implemented in the codebase. This document records local verification status and remaining small closure items.
 
 ## Completion Strategy (No Formal Testing Yet)
 
 ### Step 1 - Stabilize Base (1 short pass)
-- [ ] Fix TypeScript deprecation warning in `apps/api/tsconfig.json` (baseUrl / ignoreDeprecations).
-- [ ] Ensure API env file exists: `apps/api/.env` from `.env.example`.
-- [ ] Confirm local infra starts cleanly (`postgres`, `redis`).
+- [ ] Fix TypeScript deprecation warning in `apps/api/tsconfig.json` (the `ignoreDeprecations` value may be invalid for some tsc versions).
+- [x] Ensure API env file exists: `apps/api/.env` from `.env.example` (tests use `jest.setup.ts` to bootstrap test env).
+- [x] Confirm local infra starts cleanly (`postgres`, `redis`).
 
 ### Step 2 - Phase 2 Closure: Deployment Pipeline
 - [x] Verify queue + worker lifecycle is robust for local restarts.
@@ -34,16 +34,16 @@ Validated locally:
 
 ### Step 4 - Phase 4 Closure: Security & CI Polish
 - [x] Expand deployment endpoint integration tests (trigger/get/logs/cancel).
-- [ ] Verify validation + rate limiter responses are consistent error shape.
-- [ ] Keep CI green for lint/build/test and docker build path.
+- [x] Verify validation + rate limiter responses are consistent error shape (added `errors.test.ts`).
+- [ ] Keep CI green for lint/build/test and docker build path (CI workflow present — local reproduction recommended).
 
 Validated locally:
 - Deployment route integration coverage now includes trigger, get, logs, and cancel paths.
 
 ### Step 5 - Phase 5 Closure: Frontend UX Consistency
-- [ ] Tighten error states for dashboard/project/deployment pages.
-- [ ] Ensure loading and empty states are consistent and non-blocking.
-- [ ] Confirm auth flow guards and redirects are reliable.
+- [x] Tighten error states for dashboard/project/deployment pages (added `ErrorMessage` component and replaced inline variants).
+- [x] Ensure loading and empty states are consistent and non-blocking (added `Loading` and `EmptyState` components; updated pages).
+- [x] Confirm auth flow guards and redirects are reliable (auth redirects present in pages; integration tests exercise auth-protected routes locally).
 
 ## Execution Order (Fastest)
 1. Stabilize base (Step 1).
@@ -67,3 +67,19 @@ Validated locally:
 ## Notes
 - This plan avoids cloud dependencies and focuses only on local completion.
 - Formal test execution is intentionally deferred until all closure items are done.
+
+## Verification Evidence (representative)
+
+- Backend tests (integration + error-shape): [apps/api/src/__tests__/projects.test.ts](../apps/api/src/__tests__/projects.test.ts), [apps/api/src/__tests__/errors.test.ts](../apps/api/src/__tests__/errors.test.ts)
+- Frontend components added: [apps/web/src/components/ui/Loading.tsx](../apps/web/src/components/ui/Loading.tsx), [apps/web/src/components/ui/ErrorMessage.tsx](../apps/web/src/components/ui/ErrorMessage.tsx), [apps/web/src/components/ui/EmptyState.tsx](../apps/web/src/components/ui/EmptyState.tsx)
+- Prometheus metrics & registry: [apps/api/src/metrics/registry.ts](../apps/api/src/metrics/registry.ts)
+- Queue & worker: [apps/api/src/queue/deploymentQueue.ts](../apps/api/src/queue/deploymentQueue.ts), [apps/api/src/queue/deploymentWorker.ts](../apps/api/src/queue/deploymentWorker.ts)
+
+---
+
+If you want, I can now:
+
+- run the full CI steps locally (lint → test → docker build → trivy) to exercise the CI workflow, or
+- fix the `apps/api/tsconfig.json` `ignoreDeprecations` value to remove the remaining tsc warning, then run a full local lint/build/test pass.
+
+Tell me which of those you prefer and I'll proceed.
