@@ -10,6 +10,8 @@ import {
   Zap, ArrowLeft, CheckCircle2, XCircle, Clock, Loader2,
   Activity, Terminal, StopCircle, ChevronDown,
 } from 'lucide-react';
+import Loading from '@/components/ui/Loading';
+import ErrorMessage from '@/components/ui/ErrorMessage';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface LogLine {
@@ -163,7 +165,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="animate-spin text-primary" size={28} />
+        <Loading size={28} />
       </div>
     );
   }
@@ -235,10 +237,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
 
         {/* Error display */}
         {deployment?.error && (
-          <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-            <XCircle size={16} className="flex-shrink-0 mt-0.5" />
-            <span>{deployment.error}</span>
-          </div>
+          <ErrorMessage>{deployment.error}</ErrorMessage>
         )}
 
         {/* Terminal Log Viewer */}
@@ -274,7 +273,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
           >
             {logs.length === 0 ? (
               <div className="flex items-center gap-2 text-zinc-600">
-                <Loader2 size={12} className="animate-spin" />
+                <Loading size={12} className="text-zinc-600" />
                 <span>Waiting for pipeline to start…</span>
               </div>
             ) : (

@@ -9,6 +9,9 @@ import {
   Zap, Plus, LogOut, Clock, CheckCircle2, XCircle, Loader2,
   GitBranch, Activity, FolderGit2, ChevronRight,
 } from 'lucide-react';
+import Loading from '@/components/ui/Loading';
+import ErrorMessage from '@/components/ui/ErrorMessage';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Deployment {
   id: string; status: string; createdAt: string; duration: number | null; commitMessage: string | null;
@@ -107,7 +110,7 @@ export default function DashboardPage() {
 
   if (authLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <Loader2 className="animate-spin text-primary" size={32} />
+      <Loading />
     </div>
   );
 
@@ -152,24 +155,21 @@ export default function DashboardPage() {
         {/* Content */}
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="animate-spin text-primary" size={28} />
+            <Loading size={28} />
           </div>
         ) : error ? (
-          <div className="text-center py-24 text-muted-foreground">{error}</div>
+          <ErrorMessage>{error}</ErrorMessage>
         ) : projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <FolderGit2 size={28} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-lg">No projects yet</h2>
-              <p className="text-muted-foreground text-sm mt-1">Connect a GitHub repository to start deploying</p>
-            </div>
-            <Link href="/projects/new"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition">
-              <Plus size={16} /> Create your first project
-            </Link>
-          </div>
+          <EmptyState
+            title="No projects yet"
+            description="Connect a GitHub repository to start deploying"
+            action={(
+              <Link href="/projects/new"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition">
+                <Plus size={16} /> Create your first project
+              </Link>
+            )}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((project) => (
