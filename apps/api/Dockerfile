@@ -1,24 +1,28 @@
 # syntax=docker/dockerfile:1
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # ─── Dependencies stage ───────────────────────────────────────────────────────
 FROM base AS deps
 COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 COPY packages/shared/package*.json ./packages/shared/
-RUN npm ci --workspace=apps/api --workspace=packages/shared --ignore-scripts
+RUN npm ci --ignore-scripts
 
 # ─── Build stage ─────────────────────────────────────────────────────────────
 FROM deps AS builder
 COPY packages/shared ./packages/shared
 COPY apps/api ./apps/api
+RUN npm run db:generate --workspace=apps/api
+RUN npm run build --workspace=packages/shared
 RUN npm run build --workspace=apps/api
 
 # ─── Production stage ────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
-WORKDIR /app
+FROM base AS runner
+WORKDIR /app/apps/api
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && \
@@ -28,8 +32,9 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder --chown=apiuser:nodejs /app/apps/api/dist ./dist
 COPY --from=builder --chown=apiuser:nodejs /app/apps/api/package*.json ./
 COPY --from=builder --chown=apiuser:nodejs /app/apps/api/prisma ./prisma
-COPY --from=deps --chown=apiuser:nodejs /app/node_modules ./node_modules
-COPY --from=deps --chown=apiuser:nodejs /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder --chown=apiuser:nodejs /app/apps/api/node_modules ./node_modules
+COPY --from=builder --chown=apiuser:nodejs /app/node_modules /app/node_modules
+COPY --from=builder --chown=apiuser:nodejs /app/packages/shared /app/packages/shared
 
 USER apiuser
 
