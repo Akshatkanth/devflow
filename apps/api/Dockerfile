@@ -4,6 +4,9 @@ WORKDIR /app
 RUN apt-get update -y \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN mkdir -p /ms-playwright && \
+    npx --yes playwright@1.54.2 install --with-deps chromium
 
 # ─── Dependencies stage ───────────────────────────────────────────────────────
 FROM base AS deps
@@ -24,6 +27,7 @@ RUN npm run build --workspace=apps/api
 FROM base AS runner
 WORKDIR /app/apps/api
 ENV NODE_ENV=production
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 apiuser

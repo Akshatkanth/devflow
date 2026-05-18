@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import path from 'node:path';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
@@ -19,6 +20,7 @@ import deploymentsRoutes from './modules/deployments/deployments.routes';
 
 export function createApp() {
   const app = express();
+  const previewStorageDir = path.resolve(process.cwd(), 'storage', 'previews');
 
   // ─── Security Middleware ───────────────────────────────────────────────────
   app.use(helmet());
@@ -81,6 +83,9 @@ export function createApp() {
       uptime: Math.round(process.uptime()),
     });
   });
+
+  // ─── Deployment previews ───────────────────────────────────────────────────
+  app.use('/previews', express.static(previewStorageDir));
 
   // Prometheus scrape endpoint
   app.get('/metrics', async (_req: Request, res: Response) => {

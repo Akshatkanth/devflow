@@ -93,6 +93,9 @@ model Deployment {
   commitMessage String?
   triggeredBy   String?          // user id
   error         String?          // error message on failure
+  previewScreenshotPath      String?
+  previewScreenshotUrl       String?
+  previewScreenshotCapturedAt DateTime?
   startedAt     DateTime?
   completedAt   DateTime?
   duration      Int?             // seconds

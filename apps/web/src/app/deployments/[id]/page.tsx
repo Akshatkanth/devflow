@@ -21,6 +21,8 @@ interface Deployment {
   id: string; projectId: string; status: string; commitMessage: string | null;
   commitSha: string | null; duration: number | null; createdAt: string;
   startedAt: string | null; completedAt: string | null; error: string | null;
+  previewScreenshotPath: string | null; previewScreenshotUrl: string | null;
+  previewScreenshotCapturedAt: string | null;
 }
 
 const ACTIVE_STATUSES = ['QUEUED', 'CLONING', 'VALIDATING', 'BUILDING', 'HEALTH_CHECK'];
@@ -82,6 +84,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [previewImageFailed, setPreviewImageFailed] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -95,7 +98,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
     if (!isAuthenticated) return;
     Promise.all([
       deploymentsApi.get(id),
-      deploymentsApi.getLogs(id, { limit: 500 }),
+      deploymentsApi.getLogs(id, { limit: 100 }),
     ]).then(([depRes, logRes]) => {
       setDeployment(depRes.data.data.deployment);
       setLogs(logRes.data.data.data);
@@ -161,6 +164,9 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   const status = deployment?.status ?? 'QUEUED';
   const statusCfg = STATUS_CONFIG[status] ?? { label: status, color: 'text-zinc-400', bg: 'bg-zinc-400/10', icon: <Activity size={14} /> };
   const isActive = ACTIVE_STATUSES.includes(status);
+  const previewImageUrl = deployment?.previewScreenshotUrl;
+  const hasPreviewImage = Boolean(previewImageUrl) && !previewImageFailed;
+  const previewImageSrc = previewImageUrl ?? '';
 
   if (isLoading || authLoading) {
     return (
@@ -239,6 +245,32 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
         {deployment?.error && (
           <ErrorMessage>{deployment.error}</ErrorMessage>
         )}
+
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3">
+            <h2 className="font-semibold text-sm">Deployment preview</h2>
+            {deployment?.previewScreenshotCapturedAt && (
+              <span className="text-xs text-muted-foreground">
+                Captured {formatDistanceToNow(new Date(deployment.previewScreenshotCapturedAt), { addSuffix: true })}
+              </span>
+            )}
+          </div>
+          {hasPreviewImage ? (
+            <img
+              src={previewImageSrc}
+              alt="Deployment preview screenshot"
+              className="block w-full max-h-[560px] object-cover bg-zinc-950"
+              onError={() => setPreviewImageFailed(true)}
+            />
+          ) : (
+            <div className="px-4 py-12 text-center">
+              <p className="text-sm font-medium">No preview screenshot available</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                A preview will appear here after a successful deployment capture.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Terminal Log Viewer */}
         <div className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden flex flex-col min-h-[400px]">

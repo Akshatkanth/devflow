@@ -18,9 +18,15 @@ The application is structured as a Turborepo monorepo with the following core se
 2. API validates request and enqueues a job in BullMQ (`deploymentQueue`).
 3. BullMQ Worker picks up the job.
 4. Worker executes the simulated pipeline: `Clone -> Validate -> Build -> Health Check`.
-5. Worker updates Postgres `Deployment` status and emits log events to `deploymentLog` table.
-6. Worker emits WebSocket events to `deployment:<id>` room via Socket.io.
-7. Connected frontend clients receive real-time status updates and log lines.
+5. After successful health checks, the worker captures a local preview screenshot with Playwright and stores it under `apps/api/storage/previews`.
+6. Worker updates Postgres `Deployment` status, preview metadata, and emits log events to `deploymentLog` table.
+7. Worker emits WebSocket events to `deployment:<id>` room via Socket.io.
+8. Connected frontend clients receive real-time status updates, log lines, and deployment preview metadata.
+
+### Preview Storage Flow
+1. Preview screenshots are written to the local filesystem only; no cloud storage is involved.
+2. The API serves preview images from `/previews` so the frontend can render them directly.
+3. Screenshot capture failures are logged separately and never fail the deployment state transition.
 
 ### Observability Flow
 1. API records metrics using `prom-client` (HTTP requests, deployment durations, WebSocket connections, Node.js heap).

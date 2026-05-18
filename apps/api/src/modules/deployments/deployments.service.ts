@@ -10,6 +10,40 @@ import {
 import type { Deployment, DeploymentLog, PaginatedResponse } from '@devflow/shared';
 import { DeploymentStatus, LogLevel, ProjectRole } from '@devflow/shared';
 
+function mapDeployment(deployment: {
+  id: string;
+  projectId: string;
+  status: string;
+  commitSha: string | null;
+  commitMessage: string | null;
+  triggeredBy: string | null;
+  previewScreenshotPath: string | null;
+  previewScreenshotUrl: string | null;
+  previewScreenshotCapturedAt: Date | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  duration: number | null;
+  error: string | null;
+  createdAt: Date;
+}): Deployment {
+  return {
+    id: deployment.id,
+    projectId: deployment.projectId,
+    status: deployment.status as DeploymentStatus,
+    commitSha: deployment.commitSha,
+    commitMessage: deployment.commitMessage,
+    triggeredBy: deployment.triggeredBy,
+    previewScreenshotPath: deployment.previewScreenshotPath,
+    previewScreenshotUrl: deployment.previewScreenshotUrl,
+    previewScreenshotCapturedAt: deployment.previewScreenshotCapturedAt,
+    startedAt: deployment.startedAt,
+    completedAt: deployment.completedAt,
+    duration: deployment.duration,
+    error: deployment.error,
+    createdAt: deployment.createdAt,
+  };
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function assertDeploymentAccess(deploymentId: string, userId: string): Promise<Deployment> {
@@ -23,19 +57,7 @@ async function assertDeploymentAccess(deploymentId: string, userId: string): Pro
   const isMember = deployment.project.members.some((m) => m.userId === userId);
   if (!isMember) throw new NotFoundError('Deployment');
 
-  return {
-    id: deployment.id,
-    projectId: deployment.projectId,
-    status: deployment.status as DeploymentStatus,
-    commitSha: deployment.commitSha,
-    commitMessage: deployment.commitMessage,
-    triggeredBy: deployment.triggeredBy,
-    startedAt: deployment.startedAt,
-    completedAt: deployment.completedAt,
-    duration: deployment.duration,
-    error: deployment.error,
-    createdAt: deployment.createdAt,
-  };
+  return mapDeployment(deployment);
 }
 
 async function isDeploymentCancelled(deploymentId: string): Promise<boolean> {
@@ -123,19 +145,7 @@ export async function triggerDeployment(
 
   logger.info({ deploymentId: deployment.id, projectId, userId }, 'Deployment triggered');
 
-  return {
-    id: deployment.id,
-    projectId: deployment.projectId,
-    status: deployment.status as DeploymentStatus,
-    commitSha: deployment.commitSha,
-    commitMessage: deployment.commitMessage,
-    triggeredBy: deployment.triggeredBy,
-    startedAt: deployment.startedAt,
-    completedAt: deployment.completedAt,
-    duration: deployment.duration,
-    error: deployment.error,
-    createdAt: deployment.createdAt,
-  };
+  return mapDeployment(deployment);
 }
 
 export async function getDeployment(deploymentId: string, userId: string): Promise<Deployment> {

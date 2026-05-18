@@ -4,6 +4,7 @@ import { getIoServer } from '../websocket/io';
 import type { DeploymentJobData } from '../queue/deploymentQueue';
 import { deploymentDuration, deploymentsTotal } from '../metrics/registry';
 import { DeploymentStatus, LogLevel } from '@devflow/shared';
+import { captureDeploymentPreview } from '../services/deploymentPreview';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -291,6 +292,9 @@ export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
       logger.info({ deploymentId }, 'Deployment was cancelled after health check step');
       return;
     }
+
+    // Post-success enhancement: capture a preview screenshot without affecting deployment state.
+    await captureDeploymentPreview(deploymentId);
 
     // Finalize: Calculate duration and mark complete
     const startedAt = await getDeploymentStartTime(deploymentId);

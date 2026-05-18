@@ -20,6 +20,9 @@ const envSchema = z.object({
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
 
+  // Preview screenshot capture target (optional)
+  DEPLOYMENT_PREVIEW_URL: z.string().url().optional(),
+
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000), // 15 min
   RATE_LIMIT_MAX: z.coerce.number().default(100),

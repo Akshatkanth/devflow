@@ -79,6 +79,9 @@ export interface Deployment {
   commitSha: string | null;
   commitMessage: string | null;
   triggeredBy: string | null;
+  previewScreenshotPath: string | null;
+  previewScreenshotUrl: string | null;
+  previewScreenshotCapturedAt: Date | null;
   startedAt: Date | null;
   completedAt: Date | null;
   duration: number | null;    // seconds

@@ -14,6 +14,40 @@ import type {
 import { ProjectRole, DeploymentStatus } from '@devflow/shared';
 import type { CreateProjectInput, UpdateProjectInput } from '@devflow/shared';
 
+function mapDeployment(deployment: {
+  id: string;
+  projectId: string;
+  status: string;
+  commitSha: string | null;
+  commitMessage: string | null;
+  triggeredBy: string | null;
+  previewScreenshotPath: string | null;
+  previewScreenshotUrl: string | null;
+  previewScreenshotCapturedAt: Date | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  duration: number | null;
+  error: string | null;
+  createdAt: Date;
+}): Deployment {
+  return {
+    id: deployment.id,
+    projectId: deployment.projectId,
+    status: deployment.status as DeploymentStatus,
+    commitSha: deployment.commitSha,
+    commitMessage: deployment.commitMessage,
+    triggeredBy: deployment.triggeredBy,
+    previewScreenshotPath: deployment.previewScreenshotPath,
+    previewScreenshotUrl: deployment.previewScreenshotUrl,
+    previewScreenshotCapturedAt: deployment.previewScreenshotCapturedAt,
+    startedAt: deployment.startedAt,
+    completedAt: deployment.completedAt,
+    duration: deployment.duration,
+    error: deployment.error,
+    createdAt: deployment.createdAt,
+  };
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function assertProjectAccess(projectId: string, userId: string): Promise<void> {
@@ -123,21 +157,7 @@ export async function listProjects(userId: string): Promise<ProjectWithStats[]> 
     return {
       ...mapProject(project),
       deploymentCount: project._count.deployments,
-      lastDeployment: lastDep
-        ? ({
-            id: lastDep.id,
-            projectId: lastDep.projectId,
-            status: lastDep.status as DeploymentStatus,
-            commitSha: lastDep.commitSha,
-            commitMessage: lastDep.commitMessage,
-            triggeredBy: lastDep.triggeredBy,
-            startedAt: lastDep.startedAt,
-            completedAt: lastDep.completedAt,
-            duration: lastDep.duration,
-            error: lastDep.error,
-            createdAt: lastDep.createdAt,
-          } as Deployment)
-        : null,
+      lastDeployment: lastDep ? mapDeployment(lastDep) : null,
     };
   });
 }
@@ -163,21 +183,7 @@ export async function getProject(projectId: string, userId: string): Promise<Pro
   return {
     ...mapProject(project),
     deploymentCount: project._count.deployments,
-    lastDeployment: lastDep
-      ? ({
-          id: lastDep.id,
-          projectId: lastDep.projectId,
-          status: lastDep.status as DeploymentStatus,
-          commitSha: lastDep.commitSha,
-          commitMessage: lastDep.commitMessage,
-          triggeredBy: lastDep.triggeredBy,
-          startedAt: lastDep.startedAt,
-          completedAt: lastDep.completedAt,
-          duration: lastDep.duration,
-          error: lastDep.error,
-          createdAt: lastDep.createdAt,
-        } as Deployment)
-      : null,
+    lastDeployment: lastDep ? mapDeployment(lastDep) : null,
   };
 }
 
@@ -231,19 +237,7 @@ export async function getProjectDeployments(
   ]);
 
   return {
-    data: deployments.map((d) => ({
-      id: d.id,
-      projectId: d.projectId,
-      status: d.status as DeploymentStatus,
-      commitSha: d.commitSha,
-      commitMessage: d.commitMessage,
-      triggeredBy: d.triggeredBy,
-      startedAt: d.startedAt,
-      completedAt: d.completedAt,
-      duration: d.duration,
-      error: d.error,
-      createdAt: d.createdAt,
-    })),
+    data: deployments.map((d) => mapDeployment(d)),
     total,
     page,
     limit,

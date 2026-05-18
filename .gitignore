@@ -37,6 +37,7 @@ coverage/
 
 # Prisma
 apps/api/prisma/migrations/
+apps/api/storage/previews/*.png
 
 # Turbo
 .turbo/

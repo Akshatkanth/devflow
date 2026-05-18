@@ -1,13 +1,14 @@
 # DevFlow - Project Overview
 
 ## Summary
-DevFlow is a developer-focused SaaS platform that simulates a modern deployment pipeline (similar to Render or Railway). It allows users to connect GitHub repositories, trigger deployments, monitor real-time build logs, track deployment history, and view application health/metrics through a dashboard.
+DevFlow is a developer-focused SaaS platform that simulates a modern deployment pipeline (similar to Render or Railway). It allows users to connect GitHub repositories, trigger deployments, monitor real-time build logs, track deployment history, and view application health/metrics through a dashboard. Successful deployments now also generate a local preview screenshot for quick visual verification.
 
 The project is designed to showcase backend engineering, DevOps practices, cloud infrastructure concepts, observability, and distributed systems patterns.
 
 ## Core Features
 - **Project Management:** Connect repositories, set branches.
 - **Simulated Deployment Pipeline:** Clones, validates structure, simulates Docker builds, and performs health checks.
+- **Deployment Preview Screenshots:** Captures a post-success homepage screenshot and stores it locally for the deployment details page.
 - **Real-Time Logs:** Streaming build logs to the frontend via WebSockets.
 - **Observability:** Built-in Prometheus metrics, Grafana dashboards, and structured Pino logging.
 - **Security:** JWT authentication, RBAC, tiered rate-limiting, and Zod validation.
