@@ -8,7 +8,7 @@ import { deploymentsApi } from '@/lib/api';
 import { io, Socket } from 'socket.io-client';
 import {
   Zap, ArrowLeft, CheckCircle2, XCircle, Clock, Loader2,
-  Activity, Terminal, StopCircle, ChevronDown,
+  Activity, Terminal, StopCircle, ChevronDown, ExternalLink, RefreshCw,
 } from 'lucide-react';
 import Loading from '@/components/ui/Loading';
 import ErrorMessage from '@/components/ui/ErrorMessage';
@@ -79,12 +79,12 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [previewImageFailed, setPreviewImageFailed] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -109,8 +109,6 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     if (!deployment) return;
     if (!ACTIVE_STATUSES.includes(deployment.status)) return;
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
     const socket = io(apiUrl, { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
 
@@ -170,12 +168,25 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
     setDeployment((prev) => prev ? { ...prev, status: 'CANCELLED' } : prev);
   };
 
+  const refreshDeployment = async () => {
+    const res = await deploymentsApi.get(id);
+    setDeployment(res.data.data.deployment);
+  };
+
+  const openPreview = () => {
+    const resolvedPreviewUrl = `${apiUrl}/previews/${id}.png`;
+
+    window.open(
+      `${resolvedPreviewUrl}${resolvedPreviewUrl.includes('?') ? '&' : '?'}v=${deployment?.previewScreenshotCapturedAt ?? deployment?.completedAt ?? Date.now()}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
   const status = deployment?.status ?? 'QUEUED';
   const statusCfg = STATUS_CONFIG[status] ?? { label: status, color: 'text-zinc-400', bg: 'bg-zinc-400/10', icon: <Activity size={14} /> };
   const isActive = ACTIVE_STATUSES.includes(status);
-  const previewImageUrl = deployment?.previewScreenshotUrl;
-  const hasPreviewImage = Boolean(previewImageUrl) && !previewImageFailed;
-  const previewImageSrc = previewImageUrl ?? '';
+  const previewImageUrl = `${apiUrl}/previews/${id}.png`;
 
   if (isLoading || authLoading) {
     return (
@@ -255,30 +266,32 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
           <ErrorMessage>{deployment.error}</ErrorMessage>
         )}
 
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3">
+        <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
             <h2 className="font-semibold text-sm">Deployment preview</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Open the captured screenshot in a new tab.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
             {deployment?.previewScreenshotCapturedAt && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 Captured {formatDistanceToNow(new Date(deployment.previewScreenshotCapturedAt), { addSuffix: true })}
               </span>
             )}
+            <button
+              onClick={refreshDeployment}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md border border-border hover:bg-accent transition"
+            >
+              <RefreshCw size={12} /> Reload
+            </button>
+            <button
+              onClick={openPreview}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition"
+            >
+              <ExternalLink size={12} /> Open preview
+            </button>
           </div>
-          {hasPreviewImage ? (
-            <img
-              src={previewImageSrc}
-              alt="Deployment preview screenshot"
-              className="block w-full max-h-[560px] object-cover bg-zinc-950"
-              onError={() => setPreviewImageFailed(true)}
-            />
-          ) : (
-            <div className="px-4 py-12 text-center">
-              <p className="text-sm font-medium">No preview screenshot available</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                A preview will appear here after a successful deployment capture.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Terminal Log Viewer */}
