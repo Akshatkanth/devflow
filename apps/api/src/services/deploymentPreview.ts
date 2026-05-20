@@ -32,6 +32,22 @@ const API_PREVIEW_STORAGE_DIR = path.resolve(repoRoot, 'apps', 'api', 'storage',
 const PREVIEW_PUBLIC_BASE_URL = `http://localhost:${env.PORT}`;
 const DEFAULT_APP_URL = process.env.DEPLOYMENT_PREVIEW_URL;
 
+function resolveRuntimeTargetUrl(targetUrl?: string): string | undefined {
+  if (targetUrl) {
+    return targetUrl;
+  }
+
+  if (env.DEPLOYMENT_RUNTIME_URL) {
+    return env.DEPLOYMENT_RUNTIME_URL;
+  }
+
+  if (env.DEPLOYMENT_RUNTIME_PORT) {
+    return `http://localhost:${env.DEPLOYMENT_RUNTIME_PORT}`;
+  }
+
+  return DEFAULT_APP_URL;
+}
+
 function getPreviewFileName(deploymentId: string): string {
   return `${deploymentId}.png`;
 }
@@ -49,29 +65,27 @@ export async function captureDeploymentPreview(deploymentId: string, targetUrl?:
     where: { id: deploymentId },
     select: {
       status: true,
-      project: {
-        select: { repoUrl: true },
-      },
     },
   });
 
-  if (!deployment || deployment.status !== DeploymentStatus.HEALTHY) {
+  if (!deployment || (deployment.status !== DeploymentStatus.HEALTH_CHECK && deployment.status !== DeploymentStatus.HEALTHY)) {
     return;
   }
 
-  // Use explicit targetUrl, or fall back to repo URL, or env default
-  const resolvedTargetUrl = targetUrl ?? deployment.project.repoUrl ?? DEFAULT_APP_URL;
+  // Use the active deployment runtime URL if available. Do not fall back to
+  // a repository URL, because screenshots must come from the running app.
+  const resolvedTargetUrl = resolveRuntimeTargetUrl(targetUrl);
 
   if (!resolvedTargetUrl) {
     await prisma.deploymentLog.create({
       data: {
         deploymentId,
-        message: 'Preview capture skipped: no URL available (no repoUrl configured)',
+        message: 'Preview capture skipped: no runtime URL available',
         level: 'warn',
         timestamp: new Date(),
       },
     });
-    logger.warn({ deploymentId }, 'Preview capture skipped: no target URL');
+    logger.warn({ deploymentId }, 'Preview capture skipped: no runtime URL');
     return;
   }
 

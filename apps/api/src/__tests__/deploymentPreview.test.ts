@@ -32,12 +32,12 @@ describe('captureDeploymentPreview', () => {
   });
 
   it('captures preview when deployment is healthy', async () => {
-    prisma.deployment.findUnique.mockResolvedValue({ status: 'HEALTHY' });
+    prisma.deployment.findUnique.mockResolvedValue({ status: 'HEALTH_CHECK' });
 
     const mockPage = {
       goto: jest.fn().mockResolvedValue(undefined),
       waitForTimeout: jest.fn().mockResolvedValue(undefined),
-      screenshot: jest.fn().mockResolvedValue(undefined),
+      screenshot: jest.fn().mockResolvedValue(Buffer.from('png')),
     };
     const mockBrowser = {
       newPage: jest.fn().mockResolvedValue(mockPage),
@@ -46,18 +46,22 @@ describe('captureDeploymentPreview', () => {
 
     playwright.chromium.launch.mockResolvedValue(mockBrowser);
 
-    await captureDeploymentPreview('deployment-123');
+    await captureDeploymentPreview('deployment-123', 'http://localhost:4312');
 
     expect(prisma.deployment.update).toHaveBeenCalled();
     expect(mockBrowser.newPage).toHaveBeenCalled();
     expect(mockPage.screenshot).toHaveBeenCalled();
+    expect(mockPage.goto).toHaveBeenCalledWith(
+      'http://localhost:4312',
+      expect.objectContaining({ waitUntil: 'load', timeout: 30000 })
+    );
     expect(mockBrowser.close).toHaveBeenCalled();
   });
 
   it('does nothing if deployment not healthy', async () => {
     prisma.deployment.findUnique.mockResolvedValue({ status: 'FAILED' });
 
-    await captureDeploymentPreview('deployment-456');
+    await captureDeploymentPreview('deployment-456', 'http://localhost:4312');
 
     expect(playwright.chromium.launch).not.toHaveBeenCalled();
     expect(prisma.deployment.update).not.toHaveBeenCalled();

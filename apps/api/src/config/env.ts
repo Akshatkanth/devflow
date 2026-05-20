@@ -23,6 +23,10 @@ const envSchema = z.object({
   // Preview screenshot capture target (optional)
   DEPLOYMENT_PREVIEW_URL: z.string().url().optional(),
 
+  // Active deployment runtime URL/port for local container screenshots (optional)
+  DEPLOYMENT_RUNTIME_URL: z.string().url().optional(),
+  DEPLOYMENT_RUNTIME_PORT: z.coerce.number().int().positive().optional(),
+
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000), // 15 min
   RATE_LIMIT_MAX: z.coerce.number().default(100),

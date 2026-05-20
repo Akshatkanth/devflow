@@ -12,6 +12,7 @@ interface PipelineContext {
   deploymentId: string;
   repoUrl: string;
   branch: string;
+  runtimeUrl?: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -100,6 +101,18 @@ function mockCommitSha(): string {
   return Math.random().toString(16).slice(2, 9);
 }
 
+function resolveRuntimeUrl(): string | undefined {
+  if (process.env.DEPLOYMENT_RUNTIME_URL) {
+    return process.env.DEPLOYMENT_RUNTIME_URL;
+  }
+
+  if (process.env.DEPLOYMENT_RUNTIME_PORT) {
+    return `http://localhost:${process.env.DEPLOYMENT_RUNTIME_PORT}`;
+  }
+
+  return undefined;
+}
+
 // ─── Simulated Pipeline Steps ─────────────────────────────────────────────────
 
 async function stepClone(ctx: PipelineContext): Promise<string> {
@@ -133,7 +146,7 @@ async function stepValidate(ctx: PipelineContext): Promise<string> {
   await emitLog(deploymentId, `Validating project structure...`);
   await delay(500);
 
-  // Detect framework from repo URL heuristic
+  // Detect framework from repository name heuristic
   const repoName = repoUrl.split('/').pop()?.toLowerCase() ?? '';
   let framework = 'node';
   let runtime = 'Node.js 20';
@@ -222,11 +235,12 @@ async function stepBuild(ctx: PipelineContext, framework: string): Promise<void>
 
 async function stepHealthCheck(ctx: PipelineContext): Promise<void> {
   const { deploymentId } = ctx;
+  const runtimeUrl = ctx.runtimeUrl ?? 'http://localhost:3000';
   await updateStatus(deploymentId, DeploymentStatus.HEALTH_CHECK);
 
   await emitLog(deploymentId, `Running health checks...`);
   await delay(600);
-  await emitLog(deploymentId, `Starting container on port 3000...`);
+  await emitLog(deploymentId, `Starting container at ${runtimeUrl}...`);
   await delay(800);
   await emitLog(deploymentId, `Waiting for application to be ready...`);
   await delay(1000);
@@ -234,7 +248,7 @@ async function stepHealthCheck(ctx: PipelineContext): Promise<void> {
   // Simulate 3 health check probes
   for (let i = 1; i <= 3; i++) {
     await delay(600);
-    await emitLog(deploymentId, `Health probe ${i}/3: GET http://localhost:3000/health`);
+    await emitLog(deploymentId, `Health probe ${i}/3: GET ${runtimeUrl}/health`);
     await delay(400);
     if (i < 3) {
       await emitLog(deploymentId, `  → 200 OK (${120 + i * 15}ms)`);
@@ -251,7 +265,12 @@ async function stepHealthCheck(ctx: PipelineContext): Promise<void> {
 
 export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
   const { deploymentId, repoUrl, branch } = data;
-  const ctx: PipelineContext = { deploymentId, repoUrl, branch };
+  const ctx: PipelineContext = {
+    deploymentId,
+    repoUrl,
+    branch,
+    runtimeUrl: resolveRuntimeUrl(),
+  };
 
   logger.info({ deploymentId }, 'Starting deployment pipeline');
 
@@ -317,17 +336,15 @@ export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
       LogLevel.SUCCESS
     );
 
-    await updateStatus(deploymentId, DeploymentStatus.HEALTHY);
-
-    // Post-success enhancement: capture preview of the deployed app
-    // Uses repo URL as the target (will show GitHub page as proof deployment works)
-    const deployment = await prisma.deployment.findUnique({
-      where: { id: deploymentId },
-      select: { project: { select: { repoUrl: true } } },
-    });
-    if (deployment?.project) {
-      await captureDeploymentPreview(deploymentId, deployment.project.repoUrl);
+    // Capture a screenshot while the deployment is still in the active
+    // health-check phase so the UI keeps the socket connection open.
+    if (ctx.runtimeUrl) {
+      await captureDeploymentPreview(deploymentId, ctx.runtimeUrl);
+    } else {
+      logger.warn({ deploymentId }, 'Skipping preview capture because no runtime URL was available');
     }
+
+    await updateStatus(deploymentId, DeploymentStatus.HEALTHY);
 
     logger.info({ deploymentId, duration }, 'Deployment pipeline completed');
   } catch (err) {
