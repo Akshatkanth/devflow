@@ -14,12 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'DevFlow — Deployment Platform',
+  title: 'Ignite — Deployment Platform',
   description:
-    'DevFlow is a developer-focused deployment platform. Connect GitHub repos, trigger deployments, stream live build logs, and monitor application health.',
+    'Ignite is a developer-focused deployment platform. Connect GitHub repos, trigger deployments, stream live build logs, and monitor application health.',
   keywords: ['deployment', 'CI/CD', 'DevOps', 'platform', 'monitoring'],
   openGraph: {
-    title: 'DevFlow — Deployment Platform',
+    title: 'Ignite — Deployment Platform',
     description: 'Modern deployment pipeline for developers.',
     type: 'website',
   },

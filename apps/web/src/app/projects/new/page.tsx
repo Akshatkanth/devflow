@@ -53,7 +53,7 @@ export default function NewProjectPage() {
     <div className="min-h-screen bg-background">
       <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/dashboard" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
+          <Link href="/" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
             <Zap size={14} strokeWidth={2.5} />
           </Link>
           <span className="text-muted-foreground">/</span>
@@ -62,7 +62,7 @@ export default function NewProjectPage() {
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-10">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-8">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-8">
           <ArrowLeft size={14} /> Back to dashboard
         </Link>
 
@@ -128,7 +128,7 @@ export default function NewProjectPage() {
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition">
               {isLoading ? <><Loader2 size={14} className="animate-spin" /> Creating...</> : 'Create project'}
             </button>
-            <Link href="/dashboard"
+            <Link href="/"
               className="px-5 py-2.5 rounded-lg border border-border text-sm hover:bg-accent transition">
               Cancel
             </Link>

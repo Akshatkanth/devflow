@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { projectsApi } from '@/lib/api';
 import {
   Zap, Plus, LogOut, Clock, CheckCircle2, XCircle, Loader2,
-  GitBranch, Activity, FolderGit2, ChevronRight,
+  GitBranch, Activity, FolderGit2, ChevronRight, ExternalLink,
 } from 'lucide-react';
 import Loading from '@/components/ui/Loading';
 import ErrorMessage from '@/components/ui/ErrorMessage';
@@ -44,48 +44,75 @@ function StatusBadge({ status }: { status: string }) {
 function ProjectCard({ project }: { project: Project }) {
   const repoName = project.repoUrl.split('/').slice(-2).join('/');
   const isActive = project.lastDeployment && ['QUEUED', 'CLONING', 'VALIDATING', 'BUILDING', 'HEALTH_CHECK'].includes(project.lastDeployment.status);
+  const router = useRouter();
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!confirm('Delete this project?')) return;
+    try {
+      await projectsApi.delete(project.id);
+      location.reload();
+    } catch {
+      // noop
+    }
+  };
 
   return (
-    <Link href={`/projects/${project.id}`}
-      className="group block bg-card border border-border rounded-xl p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary">
-            <FolderGit2 size={18} />
+    <div className="relative">
+      <Link href={`/projects/${project.id}`}
+        className="group block bg-card border border-border rounded-xl p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary">
+              <FolderGit2 size={18} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors">{project.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5 font-mono">{repoName}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors">{project.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 font-mono">{repoName}</p>
+          <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all mt-1" />
+        </div>
+
+        {project.description && (
+          <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
+        )}
+
+        <div className="flex items-center justify-between pt-3 border-t border-border/50">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <GitBranch size={12} />
+            <span>{project.branch}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">{project.deploymentCount} deploys</span>
+            {project.lastDeployment ? (
+              <StatusBadge status={project.lastDeployment.status} />
+            ) : (
+              <span className="text-xs text-muted-foreground">No deployments</span>
+            )}
           </div>
         </div>
-        <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all mt-1" />
+
+        {isActive && (
+          <div className="mt-3 h-1 rounded-full bg-border overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '60%' }} />
+          </div>
+        )}
+      </Link>
+
+      <div className="absolute top-3 right-3 flex items-center gap-2">
+        <a onClick={(e) => e.stopPropagation()} href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="p-1 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition">
+          <ExternalLink size={14} />
+        </a>
+        <button onClick={(e) => { e.stopPropagation(); router.push(`/projects/${project.id}`); }} title="Open" className="p-1 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition">
+          <ChevronRight size={14} />
+        </button>
+        <button onClick={handleDelete} title="Delete" className="p-1 rounded-md bg-card border border-border text-destructive hover:bg-destructive/10 transition">
+          <LogOut size={14} />
+        </button>
       </div>
-
-      {project.description && (
-        <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
-      )}
-
-      <div className="flex items-center justify-between pt-3 border-t border-border/50">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <GitBranch size={12} />
-          <span>{project.branch}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">{project.deploymentCount} deploys</span>
-          {project.lastDeployment ? (
-            <StatusBadge status={project.lastDeployment.status} />
-          ) : (
-            <span className="text-xs text-muted-foreground">No deployments</span>
-          )}
-        </div>
-      </div>
-
-      {isActive && (
-        <div className="mt-3 h-1 rounded-full bg-border overflow-hidden">
-          <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '60%' }} />
-        </div>
-      )}
-    </Link>
+    </div>
   );
 }
 
@@ -119,11 +146,11 @@ export default function DashboardPage() {
       {/* Navbar */}
       <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
               <Zap size={14} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-sm">DevFlow</span>
+            <span className="font-bold text-sm">Ignite</span>
           </Link>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground hidden sm:block">{user?.email}</span>

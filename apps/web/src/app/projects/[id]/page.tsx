@@ -9,6 +9,7 @@ import {
   Zap, ArrowLeft, Play, Loader2, GitBranch, CheckCircle2, XCircle,
   Clock, Activity, ExternalLink, RefreshCw, AlertCircle,
 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Deployment {
@@ -85,6 +86,8 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const [isLoading, setIsLoading] = useState(true);
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployError, setDeployError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', repoUrl: '', branch: '', description: '' });
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/login');
@@ -106,6 +109,12 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   };
 
   useEffect(() => { if (isAuthenticated) loadData(); }, [isAuthenticated, id]);
+
+  useEffect(() => {
+    if (project) {
+      setEditForm({ name: project.name, repoUrl: project.repoUrl, branch: project.branch, description: project.description ?? '' });
+    }
+  }, [project]);
 
   const handleDeploy = async () => {
     setDeployError('');
@@ -134,7 +143,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     <div className="min-h-screen bg-background">
       <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/dashboard" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
+          <Link href="/" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
             <Zap size={14} strokeWidth={2.5} />
           </Link>
           <span className="text-muted-foreground">/</span>
@@ -143,33 +152,80 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
       </nav>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-6">
           <ArrowLeft size={14} /> All projects
         </Link>
 
         {/* Project header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{project?.name}</h1>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-sm text-muted-foreground font-mono">{repoName}</span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <GitBranch size={12} />{project?.branch}
-              </span>
-            </div>
-            {project?.description && <p className="text-sm text-muted-foreground mt-2">{project.description}</p>}
+            {!isEditing ? (
+              <>
+                <h1 className="text-2xl font-bold tracking-tight">{project?.name}</h1>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-sm text-muted-foreground font-mono">{repoName}</span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <GitBranch size={12} />{project?.branch}
+                  </span>
+                </div>
+                {project?.description && <p className="text-sm text-muted-foreground mt-2">{project.description}</p>}
+              </>
+            ) : (
+              <div className="space-y-3">
+                <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-input border border-border" />
+                <input value={editForm.repoUrl} onChange={(e) => setEditForm({ ...editForm, repoUrl: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-input border border-border" />
+                <div className="flex gap-2">
+                  <input value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="flex-1 px-3 py-2 rounded-lg bg-input border border-border" />
+                  <input value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="flex-1 px-3 py-2 rounded-lg bg-input border border-border" placeholder="Short description" />
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
+            <a href={project?.repoUrl} target="_blank" rel="noopener noreferrer" title="Open repository" className="p-2 rounded-lg border border-border hover:bg-accent transition">
+              <ExternalLink size={14} />
+            </a>
             <button onClick={loadData} className="p-2 rounded-lg border border-border hover:bg-accent transition" title="Refresh">
               <RefreshCw size={14} />
             </button>
-            <button
-              id="trigger-deploy-btn"
-              onClick={handleDeploy}
-              disabled={isDeploying}
+            {!isEditing ? (
+              <button onClick={() => setIsEditing(true)} title="Edit project" className="p-2 rounded-lg border border-border hover:bg-accent transition">
+                <Edit size={14} />
+              </button>
+            ) : (
+              <>
+                <button onClick={async () => {
+                  try {
+                    setIsDeploying(true);
+                    await projectsApi.patch(id, { name: editForm.name, description: editForm.description || undefined, repoUrl: editForm.repoUrl, branch: editForm.branch });
+                    await loadData();
+                    setIsEditing(false);
+                  } catch (e) {
+                    // ignore errors for now
+                  } finally {
+                    setIsDeploying(false);
+                  }
+                }} className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm">Save</button>
+                <button onClick={() => { setIsEditing(false); setEditForm({ name: project?.name ?? '', repoUrl: project?.repoUrl ?? '', branch: project?.branch ?? '', description: project?.description ?? '' }); }} className="px-3 py-2 rounded-lg border border-border text-sm">Cancel</button>
+              </>
+            )}
+
+            <button onClick={handleDeploy} disabled={isDeploying}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 transition">
               {isDeploying ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
               {isDeploying ? 'Deploying...' : 'Deploy'}
+            </button>
+
+            <button onClick={async () => {
+              if (!confirm('Delete this project? This cannot be undone.')) return;
+              try {
+                await projectsApi.delete(id);
+                router.push('/');
+              } catch (err) {
+                // noop
+              }
+            }} title="Delete project" className="p-2 rounded-lg border border-destructive text-destructive hover:bg-destructive/10 transition">
+              <Trash2 size={14} />
             </button>
           </div>
         </div>

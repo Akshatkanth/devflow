@@ -46,14 +46,14 @@ export default function LoginPage() {
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground">
             <Zap size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-bold tracking-tight">DevFlow</span>
+          <span className="text-2xl font-bold tracking-tight">Ignite</span>
         </div>
 
         {/* Card */}
         <div className="bg-card border border-border rounded-2xl p-8 shadow-2xl">
           <div className="mb-6">
             <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Sign in to your DevFlow account</p>
+            <p className="text-muted-foreground mt-1 text-sm">Sign in to your Ignite account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -51,7 +51,7 @@ export default function SignupPage() {
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground">
             <Zap size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-bold tracking-tight">DevFlow</span>
+          <span className="text-2xl font-bold tracking-tight">Ignite</span>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-2xl">

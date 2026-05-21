@@ -201,7 +201,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
       {/* Navbar */}
       <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10 flex-shrink-0">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/dashboard" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
+          <Link href="/" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
             <Zap size={14} strokeWidth={2.5} />
           </Link>
           <span className="text-muted-foreground">/</span>

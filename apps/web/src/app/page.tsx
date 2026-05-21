@@ -26,7 +26,7 @@ export default function HomePage() {
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
               <Zap size={16} strokeWidth={2.5} />
             </div>
-            <span className="font-bold">DevFlow</span>
+            <span className="font-bold">Ignite</span>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/login" className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition">Sign in</Link>
@@ -53,7 +53,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-            DevFlow is a full-stack deployment platform showcasing modern backend engineering —
+            Ignite is a full-stack deployment platform showcasing modern backend engineering —
             queues, real-time logs, Prometheus metrics, and production-grade architecture.
           </p>
 
@@ -126,7 +126,7 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-border/50 py-8 text-center text-sm text-muted-foreground">
-        <p>DevFlow — Portfolio project demonstrating production backend engineering</p>
+        <p>Ignite — Portfolio project demonstrating production backend engineering</p>
       </footer>
     </div>
   );

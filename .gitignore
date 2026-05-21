@@ -39,6 +39,8 @@ coverage/
 apps/api/prisma/migrations/
 apps/api/storage/previews/*.png
 
+apps/api/storage/previews
+
 # Turbo
 .turbo/
 
@@ -60,3 +62,8 @@ docker-volumes/
 
 # Grafana
 infra/grafana/data/
+apps/api/apps/api/storage/previews/cmpei58fn001lcgnewsf6pxxj.png
+apps/api/apps/api/storage/previews/cmpflfqhj001lsi4lzmk82k95.png
+apps/api/apps/api/storage/previews/cmpfles4g0001si4logcn97i8.png
+apps/api/apps/api/storage/previews/cmpeinrd60035cgne3n9zdjqq.png
+apps/api/apps/api/storage/previews/.gitkeep
