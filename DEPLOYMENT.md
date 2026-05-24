@@ -116,8 +116,14 @@ Create a Netlify site for `apps/web`.
 
 Recommended build settings:
 
+- Base directory: `apps/web`
 - Build command: `npm run build`
 - Publish directory: `.next`
+
+Repo-level config:
+
+- The repository includes [netlify.toml](netlify.toml) so Netlify builds from the correct workspace automatically.
+- If your Netlify site already has UI-defined build settings, clear them or make them match the repo config. The build log showing `commandOrigin: ui` means the UI settings are currently overriding the repo file.
 
 Environment variables:
 
