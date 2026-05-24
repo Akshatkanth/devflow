@@ -128,7 +128,7 @@ Repo-level config:
 Environment variables:
 
 - `NEXT_PUBLIC_API_URL=https://your-render-api.onrender.com`
-- `NODE_ENV=production`
+- Do not set `NODE_ENV` in the Netlify site settings. Netlify already builds for production, and forcing `NODE_ENV=production` can cause devDependencies to be skipped during install.
 
 Notes:
 
