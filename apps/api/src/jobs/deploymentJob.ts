@@ -356,6 +356,22 @@ export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
   logger.info({ deploymentId }, 'Starting deployment pipeline');
 
   try {
+    const claimed = await prisma.deployment.updateMany({
+      where: {
+        id: deploymentId,
+        status: DeploymentStatus.QUEUED,
+      },
+      data: {
+        status: DeploymentStatus.CLONING,
+        startedAt: new Date(),
+      },
+    });
+
+    if (claimed.count === 0) {
+      logger.info({ deploymentId }, 'Skipping deployment job because it was already claimed or finished');
+      return;
+    }
+
     if (await isDeploymentCancelled(deploymentId)) {
       logger.info({ deploymentId }, 'Deployment was cancelled before pipeline started');
       return;
