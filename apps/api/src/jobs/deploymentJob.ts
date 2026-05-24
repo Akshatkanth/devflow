@@ -462,8 +462,8 @@ export async function runDeploymentJob(data: DeploymentJobData): Promise<void> {
 
     await updateStatus(deploymentId, DeploymentStatus.FAILED);
 
-    // Re-throw so BullMQ can handle retries
-    throw err;
+    // Do not rethrow: failures are already recorded in the deployment row,
+    // and retrying the same deployment job can cause repeated redeploy loops.
   } finally {
     await cleanupRuntime(ctx);
   }

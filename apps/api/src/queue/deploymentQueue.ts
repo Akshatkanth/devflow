@@ -21,11 +21,7 @@ export function getDeploymentQueue(): Queue<DeploymentJobData> {
   deploymentQueue = new Queue<DeploymentJobData>(DEPLOYMENT_QUEUE_NAME, {
     connection: redis,
     defaultJobOptions: {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 5000, // 5s initial backoff, doubles each retry
-      },
+      attempts: 1,
       removeOnComplete: { count: 100 }, // keep last 100 completed jobs
       removeOnFail: { count: 50 },      // keep last 50 failed jobs
     },
