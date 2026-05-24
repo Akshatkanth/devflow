@@ -34,11 +34,16 @@ Create a Render Web Service for `apps/api`.
 Recommended build and start commands:
 
 ```bash
-cd apps/api
-npm install
-npm run build
-npm start
+npm install --include=dev
+npm run build --workspace @devflow/shared
+npm run build --workspace @devflow/api
+npm run start --workspace @devflow/api
 ```
+
+Preferred repo layout on Render:
+
+- Use the repository root as the Render service root, not `apps/api`.
+- The repo includes [render.yaml](render.yaml) to make the API and worker workspace-aware.
 
 Environment variables for the API:
 
@@ -63,11 +68,16 @@ Create a separate Render Background Worker or Web Service for `apps/api`.
 Recommended build and start commands:
 
 ```bash
-cd apps/api
-npm install
-npm run build
-npm run worker
+npm install --include=dev
+npm run build --workspace @devflow/shared
+npm run build --workspace @devflow/api
+npm run worker --workspace @devflow/api
 ```
+
+Preferred repo layout on Render:
+
+- Use the repository root as the Render service root, not `apps/api`.
+- Reuse the same [render.yaml](render.yaml) blueprint structure so the worker sees the shared package and TypeScript types.
 
 Worker environment variables:
 

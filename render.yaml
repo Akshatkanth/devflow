@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ignite-api
+    env: node
+    rootDir: .
+    buildCommand: npm install --include=dev && npm run build --workspace @devflow/shared && npm run build --workspace @devflow/api
+    startCommand: npm run start --workspace @devflow/api
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_DEPLOYMENT_WORKER
+        value: "false"
+
+  - type: worker
+    name: ignite-worker
+    env: node
+    rootDir: .
+    buildCommand: npm install --include=dev && npm run build --workspace @devflow/shared && npm run build --workspace @devflow/api
+    startCommand: npm run worker --workspace @devflow/api
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_DEPLOYMENT_WORKER
+        value: "true"
