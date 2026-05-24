@@ -20,6 +20,32 @@ function Stop-PortProcess {
     }
 }
 
+function Stop-ProcessByCommandLineMatch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match $Pattern } |
+        ForEach-Object {
+            if ($_.ProcessId -and $_.ProcessId -ne $PID) {
+                Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+            }
+        }
+}
+
+function Clear-DirectoryIfExists {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (Test-Path $Path) {
+        Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Wait-ForDocker {
     param(
         [int]$TimeoutSeconds = 60
@@ -42,6 +68,10 @@ function Wait-ForDocker {
 Write-Host 'Stopping anything already using ports 3000 and 4000...'
 Stop-PortProcess -Port 3000
 Stop-PortProcess -Port 4000
+
+Write-Host 'Stopping lingering web dev processes and clearing cached Next artifacts...'
+Stop-ProcessByCommandLineMatch -Pattern 'apps\\web'
+Clear-DirectoryIfExists -Path (Join-Path $PSScriptRoot 'apps\web\.next')
 
 if (-not (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue)) {
     $dockerDesktop = 'C:\Program Files\Docker\Docker\Docker Desktop.exe'

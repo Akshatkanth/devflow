@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { projectsApi } from '@/lib/api';
 import {
   Zap, Plus, LogOut, Clock, CheckCircle2, XCircle, Loader2,
-  GitBranch, Activity, FolderGit2, ChevronRight, ExternalLink,
+  GitBranch, Activity, FolderGit2, ChevronRight, ExternalLink, Trash2,
 } from 'lucide-react';
 import Loading from '@/components/ui/Loading';
 import ErrorMessage from '@/components/ui/ErrorMessage';
@@ -61,31 +61,31 @@ function ProjectCard({ project }: { project: Project }) {
   return (
     <div className="relative">
       <Link href={`/projects/${project.id}`}
-        className="group block bg-card border border-border rounded-xl p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
-        <div className="flex items-start justify-between mb-4">
+        className="group block bg-card border border-border/80 rounded-xl p-4 hover:border-primary/40 transition-colors duration-150">
+        <div className="flex items-start justify-between gap-4 mb-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary border border-primary/10">
               <FolderGit2 size={18} />
             </div>
             <div>
-              <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors">{project.name}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5 font-mono">{repoName}</p>
+              <h3 className="font-semibold text-[0.95rem] leading-tight group-hover:text-primary transition-colors">{project.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5 font-mono tracking-tight">{repoName}</p>
             </div>
           </div>
-          <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all mt-1" />
+          <ChevronRight size={15} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-transform mt-1" />
         </div>
 
         {project.description && (
-          <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{project.description}</p>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/50">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between pt-3 border-t border-border/60 gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
             <GitBranch size={12} />
-            <span>{project.branch}</span>
+            <span className="truncate">{project.branch}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">{project.deploymentCount} deploys</span>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">{project.deploymentCount} deploys</span>
             {project.lastDeployment ? (
               <StatusBadge status={project.lastDeployment.status} />
             ) : (
@@ -96,20 +96,20 @@ function ProjectCard({ project }: { project: Project }) {
 
         {isActive && (
           <div className="mt-3 h-1 rounded-full bg-border overflow-hidden">
-            <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '60%' }} />
+            <div className="h-full bg-blue-500/80 rounded-full" style={{ width: '58%' }} />
           </div>
         )}
       </Link>
 
-      <div className="absolute top-3 right-3 flex items-center gap-2">
-        <a onClick={(e) => e.stopPropagation()} href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="p-1 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition">
-          <ExternalLink size={14} />
+      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+        <a onClick={(e) => e.stopPropagation()} href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition-colors">
+          <ExternalLink size={13} />
         </a>
-        <button onClick={(e) => { e.stopPropagation(); router.push(`/projects/${project.id}`); }} title="Open" className="p-1 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition">
-          <ChevronRight size={14} />
+        <button onClick={(e) => { e.stopPropagation(); router.push(`/projects/${project.id}`); }} title="Open" className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:bg-accent transition-colors">
+          <ChevronRight size={13} />
         </button>
-        <button onClick={handleDelete} title="Delete" className="p-1 rounded-md bg-card border border-border text-destructive hover:bg-destructive/10 transition">
-          <LogOut size={14} />
+        <button onClick={handleDelete} title="Delete" className="p-1.5 rounded-md bg-card border border-border text-destructive hover:bg-destructive/10 transition-colors">
+          <Trash2 size={13} />
         </button>
       </div>
     </div>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
+      <nav className="border-b border-border bg-card/55 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
@@ -163,17 +163,17 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-7 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-end justify-between gap-4 mb-7 sm:mb-8">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <h1 className="text-[1.6rem] sm:text-2xl font-semibold tracking-tight">Projects</h1>
+            <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
               {projects.length === 0 ? 'No projects yet' : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}
             </p>
           </div>
           <Link href="/projects/new"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition">
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
             <Plus size={16} />
             New project
           </Link>
@@ -181,8 +181,26 @@ export default function DashboardPage() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loading size={28} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border bg-card p-4 animate-pulse">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-muted" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 rounded bg-muted" />
+                      <div className="h-3 w-24 rounded bg-muted/70" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-4 rounded bg-muted" />
+                </div>
+                <div className="h-10 rounded bg-muted/70 mb-4" />
+                <div className="flex items-center justify-between pt-3 border-t border-border/60">
+                  <div className="h-3 w-14 rounded bg-muted/70" />
+                  <div className="h-4 w-20 rounded bg-muted/70" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>

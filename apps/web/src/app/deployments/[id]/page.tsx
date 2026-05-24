@@ -199,7 +199,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Navbar */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10 flex-shrink-0">
+      <nav className="border-b border-border bg-card/55 backdrop-blur sticky top-0 z-10 flex-shrink-0">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
           <Link href="/" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
             <Zap size={14} strokeWidth={2.5} />
@@ -213,7 +213,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 flex-1 flex flex-col gap-5 w-full">
+      <main className="max-w-6xl mx-auto px-4 py-6 flex-1 flex flex-col gap-4 w-full">
         {/* Back */}
         <Link href={`/projects/${deployment?.projectId}`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
@@ -224,7 +224,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${statusCfg.bg} ${statusCfg.color}`}>
+              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border border-border/60 ${statusCfg.bg} ${statusCfg.color}`}>
                 {statusCfg.icon}
                 {statusCfg.label}
               </span>
@@ -254,9 +254,9 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
             { label: 'Duration', value: deployment?.duration ? `${deployment.duration}s` : isActive ? 'Running…' : '—' },
             { label: 'Triggered', value: deployment ? formatDistanceToNow(new Date(deployment.createdAt), { addSuffix: true }) : '—' },
           ].map(({ label, value, mono }) => (
-            <div key={label} className="bg-card border border-border rounded-xl px-4 py-3">
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <p className={`text-sm font-medium mt-0.5 truncate ${mono ? 'font-mono' : ''}`}>{value}</p>
+            <div key={label} className="bg-card border border-border rounded-xl px-4 py-3.5">
+              <p className="text-xs text-muted-foreground tracking-wide uppercase">{label}</p>
+              <p className={`text-sm font-medium mt-0.5 truncate leading-relaxed ${mono ? 'font-mono' : ''}`}>{value}</p>
             </div>
           ))}
         </div>
@@ -269,7 +269,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
         <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-4">
           <div>
             <h2 className="font-semibold text-sm">Deployment preview</h2>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Open the captured screenshot in a new tab.
             </p>
           </div>
@@ -281,13 +281,13 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
             )}
             <button
               onClick={refreshDeployment}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md border border-border hover:bg-accent transition"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md border border-border hover:bg-accent transition-colors"
             >
               <RefreshCw size={12} /> Reload
             </button>
             <button
               onClick={openPreview}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <ExternalLink size={12} /> Open preview
             </button>
@@ -312,7 +312,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
               {!autoScroll && (
                 <button
                   onClick={() => { setAutoScroll(true); logsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
-                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
                   <ChevronDown size={12} /> Scroll to bottom
                 </button>
               )}

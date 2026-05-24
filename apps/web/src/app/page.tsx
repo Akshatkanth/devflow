@@ -15,12 +15,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       {/* Ambient gradient */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[300px] bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[520px] h-[260px] bg-blue-500/5 rounded-full blur-3xl" />
       </div>
 
       {/* Nav */}
-      <nav className="relative border-b border-border/50 bg-background/80 backdrop-blur sticky top-0 z-10">
+      <nav className="relative border-b border-border/60 bg-background/82 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
@@ -39,46 +39,46 @@ export default function HomePage() {
 
       <main className="relative">
         {/* Hero */}
-        <section className="max-w-6xl mx-auto px-4 pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-medium mb-8">
+        <section className="max-w-6xl mx-auto px-4 pt-20 pb-20 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-medium mb-7">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             Open Source · Built for engineers
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-none mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.02] mb-5">
             Deploy with<br />
             <span className="bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent">
               confidence
             </span>
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
+          <p className="text-[1.05rem] text-muted-foreground max-w-2xl mx-auto mb-9 leading-relaxed">
             Ignite is a full-stack deployment platform showcasing modern backend engineering —
             queues, real-time logs, Prometheus metrics, and production-grade architecture.
           </p>
 
           <div className="flex items-center justify-center gap-4">
             <Link href="/signup"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition shadow-lg shadow-primary/20">
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
               Start deploying <ArrowRight size={16} />
             </Link>
             <Link href="/login"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border hover:bg-accent transition text-sm font-medium">
+              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border hover:bg-accent transition-colors text-sm font-medium">
               Sign in
             </Link>
           </div>
         </section>
 
         {/* Terminal preview */}
-        <section className="max-w-3xl mx-auto px-4 mb-24">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+        <section className="max-w-3xl mx-auto px-4 mb-20">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
             <div className="flex items-center gap-1.5 px-4 py-3 bg-zinc-900 border-b border-zinc-800">
               <div className="w-3 h-3 rounded-full bg-red-500/80" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
               <div className="w-3 h-3 rounded-full bg-green-500/80" />
               <span className="ml-3 text-xs text-zinc-500 font-mono">deployment logs</span>
             </div>
-            <div className="p-5 font-mono text-xs space-y-1.5">
+            <div className="p-5 font-mono text-xs space-y-1.5 leading-relaxed">
               {[
                 ['16:42:01', 'info',    'Cloning repository: https://github.com/user/my-app'],
                 ['16:42:02', 'info',    'remote: Counting objects: 100% (147/147), done.'],
@@ -109,15 +109,15 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section className="max-w-6xl mx-auto px-4 pb-24">
-          <h2 className="text-2xl font-bold text-center mb-12">Built to impress</h2>
+        <section className="max-w-6xl mx-auto px-4 pb-20">
+          <h2 className="text-xl sm:text-2xl font-semibold text-center mb-10">Built to impress</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map(({ icon, title, desc }) => (
-              <div key={title} className="bg-card border border-border rounded-xl p-6 hover:border-primary/40 transition group">
+              <div key={title} className="bg-card border border-border rounded-xl p-5 hover:border-primary/35 transition-colors group">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition">
                   {icon}
                 </div>
-                <h3 className="font-semibold mb-2">{title}</h3>
+                <h3 className="font-semibold mb-2 text-[0.98rem]">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </div>
             ))}

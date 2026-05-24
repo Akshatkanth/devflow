@@ -51,7 +51,7 @@ export default function NewProjectPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
+      <nav className="border-b border-border bg-card/55 backdrop-blur sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <Link href="/" className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground">
             <Zap size={14} strokeWidth={2.5} />
@@ -61,17 +61,17 @@ export default function NewProjectPage() {
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 py-10">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-8">
+      <main className="max-w-2xl mx-auto px-4 py-9 sm:py-10">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-7">
           <ArrowLeft size={14} /> Back to dashboard
         </Link>
 
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight">New project</h1>
-          <p className="text-muted-foreground text-sm mt-1">Connect a GitHub repository to start deploying</p>
+        <div className="mb-7">
+          <h1 className="text-[1.6rem] sm:text-2xl font-semibold tracking-tight">New project</h1>
+          <p className="text-muted-foreground text-sm mt-1 leading-relaxed">Connect a GitHub repository to start deploying</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Project Name */}
           <div className="space-y-2">
             <label htmlFor="proj-name" className="flex items-center gap-1.5 text-sm font-medium">
@@ -79,7 +79,7 @@ export default function NewProjectPage() {
             </label>
             <input id="proj-name" type="text" value={form.name} onChange={set('name')} required
               placeholder="my-awesome-app"
-              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
             />
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
@@ -91,7 +91,7 @@ export default function NewProjectPage() {
             </label>
             <input id="repo-url" type="url" value={form.repoUrl} onChange={set('repoUrl')} required
               placeholder="https://github.com/owner/repo"
-              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
             />
             {errors.repoUrl && <p className="text-xs text-destructive">{errors.repoUrl}</p>}
             <p className="text-xs text-muted-foreground">Must be a public GitHub repository URL</p>
@@ -104,7 +104,7 @@ export default function NewProjectPage() {
             </label>
             <input id="branch" type="text" value={form.branch} onChange={set('branch')}
               placeholder="main"
-              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
             />
           </div>
 
@@ -115,7 +115,7 @@ export default function NewProjectPage() {
             </label>
             <textarea id="description" value={form.description} onChange={set('description')} rows={3}
               placeholder="A short description of this project..."
-              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+              className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
             />
           </div>
 
@@ -123,13 +123,13 @@ export default function NewProjectPage() {
             <div className="px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">{globalError}</div>
           )}
 
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-3 pt-1.5">
             <button id="create-project-submit" type="submit" disabled={isLoading}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
               {isLoading ? <><Loader2 size={14} className="animate-spin" /> Creating...</> : 'Create project'}
             </button>
             <Link href="/"
-              className="px-5 py-2.5 rounded-lg border border-border text-sm hover:bg-accent transition">
+              className="px-5 py-2.5 rounded-lg border border-border text-sm hover:bg-accent transition-colors">
               Cancel
             </Link>
           </div>
