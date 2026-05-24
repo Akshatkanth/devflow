@@ -1,6 +1,19 @@
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+export function getApiConfigurationHint(): string | null {
+  if (!IS_PRODUCTION || typeof window === 'undefined') {
+    return null;
+  }
+
+  if (!API_URL || API_URL.includes('localhost')) {
+    return 'The frontend is still using the local API URL. Set NEXT_PUBLIC_API_URL to your Render API URL in Netlify, and set CORS_ORIGIN on the API to your Netlify site.';
+  }
+
+  return null;
+}
 
 export const api = axios.create({
   baseURL: `${API_URL}/api`,

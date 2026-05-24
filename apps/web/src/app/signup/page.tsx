@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { getApiConfigurationHint } from '@/lib/api';
 import { Zap, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 
 const passwordRules = [
@@ -32,7 +33,12 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const apiErr = err as { response?: { data?: { error?: string; details?: Array<{ message: string }> } } };
       const detail = apiErr?.response?.data?.details?.[0]?.message;
-      const msg = detail ?? apiErr?.response?.data?.error ?? 'Registration failed. Please try again.';
+      const hint = getApiConfigurationHint();
+      const msg =
+        detail ??
+        apiErr?.response?.data?.error ??
+        hint ??
+        'Registration failed. Please try again.';
       setError(msg);
     } finally {
       setIsLoading(false);

@@ -11,3 +11,5 @@ services:
         value: production
       - key: ENABLE_DEPLOYMENT_WORKER
         value: "true"
+      - key: CORS_ORIGIN
+        value: "*"

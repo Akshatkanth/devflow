@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { getApiConfigurationHint } from '@/lib/api';
 import { Zap, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -23,8 +24,10 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err: unknown) {
+      const hint = getApiConfigurationHint();
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        hint ??
         'Login failed. Please try again.';
       setError(msg);
     } finally {
