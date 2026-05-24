@@ -19,7 +19,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
 
   // Redis
-  REDIS_URL: z.string().default('redis://localhost:6379'),
+  REDIS_URL: z.string().url('REDIS_URL must be a valid redis:// or rediss:// URL').optional(),
 
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 chars').optional(),
@@ -58,6 +58,14 @@ function validateEnv() {
   }
 
   const data = result.data;
+  const redisUrl = data.REDIS_URL ?? (data.NODE_ENV === 'production' ? undefined : 'redis://localhost:6379');
+
+  if (!redisUrl) {
+    console.error('❌ Invalid environment variables:');
+    console.error('  - REDIS_URL: required in production (set your Upstash/Redis connection string)');
+    process.exit(1);
+  }
+
   const masterSecret = data.JWT_SECRET;
   const accessSecret = data.JWT_ACCESS_SECRET ?? (masterSecret ? `${masterSecret}:access` : undefined);
   const refreshSecret = data.JWT_REFRESH_SECRET ?? (masterSecret ? `${masterSecret}:refresh` : undefined);
@@ -71,6 +79,7 @@ function validateEnv() {
 
   return {
     ...data,
+    REDIS_URL: redisUrl,
     JWT_ACCESS_SECRET: accessSecret,
     JWT_REFRESH_SECRET: refreshSecret,
   };
