@@ -270,7 +270,7 @@ export default function DeploymentPage({ params }: { params: Promise<{ id: strin
           <div>
             <h2 className="font-semibold text-sm">Deployment preview</h2>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Open the captured screenshot in a new tab.
+              Preview only works locally.
             </p>
           </div>
           <div className="flex items-center gap-2">
